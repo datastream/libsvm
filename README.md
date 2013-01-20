@@ -1,6 +1,6 @@
 # libsvm golang version
 
-> libsvm golang version derived work based on [LIBSVM](www.csie.ntu.edu.tw/~cjlin/libsvm/).
+> libsvm golang version derived work based on [LIBSVM 3.14](www.csie.ntu.edu.tw/~cjlin/libsvm/).
 
 ## Info
 > this lib based on LIBSVM java version, just translate java to go.
