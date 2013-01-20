@@ -1907,11 +1907,13 @@ func (this *SVM) SVM_train(prob *SVM_Problem, param *SVM_Parameter) *SVM_Model {
 		model.l = nSV
 		model.SV = make([][]SVM_Node, nSV)
 		model.sv_coef[0] = make([]float64, nSV)
+		model.sv_indices = make([]int, nSV)
 		j := 0
 		for i = 0; i < prob.l; i++ {
 			if math.Abs(f.alpha[i]) > 0 {
 				model.SV[j] = prob.x[i]
 				model.sv_coef[0][j] = f.alpha[i]
+				model.sv_indices[j] = i+1
 				j++
 			}
 		}
@@ -2065,10 +2067,12 @@ func (this *SVM) SVM_train(prob *SVM_Problem, param *SVM_Parameter) *SVM_Model {
 
 		model.l = nnz
 		model.SV = make([][]SVM_Node, nnz)
+		model.sv_indices = make([]int, nnz)
 		p = 0
 		for i = 0; i < l; i++ {
 			if nonzero[i] {
 				model.SV[p] = x[i]
+				model.sv_indices[p] = perm[i] + 1
 				p++
 			}
 		}
@@ -2242,6 +2246,18 @@ func (this *SVM) SVM_get_labels(model *SVM_Model, label []int) {
 			label[i] = model.label[i]
 		}
 	}
+}
+
+func (this *SVM) SVM_get_sv_indices(model SVM_Model, indices []int) {
+        if model.sv_indices != nil {
+                for i:=0; i<model.l; i++ {
+                        indices[i] = model.sv_indices[i]
+		}
+	}
+}
+
+func (this *SVM) SVM_get_nr_sv(model SVM_Model) int {
+	return model.l
 }
 
 func (this *SVM) SVM_get_svr_probability(model *SVM_Model) float64 {
