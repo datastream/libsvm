@@ -179,17 +179,17 @@ func (this *Kernel) kernel_function(i, j int) float64 {
 	case SIGMOID:
 		return math.Tanh(this.gamma*dot(this.x[i], this.x[j]) + this.coef0)
 	case PRECOMPUTED:
-		return this.x[i][int(this.x[j][0].value)].value
+		return this.x[i][int(this.x[j][0].Value)].Value
 	}
 	return 0
 }
 
 func NewKernel(l int, x_ [][]SVM_Node, param *SVM_Parameter) *Kernel {
 	this := new(Kernel)
-	this.kernel_type = param.kernel_type
-	this.degree = param.degree
-	this.gamma = param.gamma
-	this.coef0 = param.coef0
+	this.kernel_type = param.Kernel_type
+	this.degree = param.Degree
+	this.gamma = param.Gamma
+	this.coef0 = param.Coef0
 	// x_.clone
 	this.x = x_
 
@@ -212,12 +212,12 @@ func dot(x, y []SVM_Node) float64 {
 	i := 0
 	j := 0
 	for i < xlen && j < ylen {
-		if x[i].index == y[j].index {
-			sum += x[i].value * y[j].value
+		if x[i].Index == y[j].Index {
+			sum += x[i].Value * y[j].Value
 			i++
 			j++
 		} else {
-			if x[i].index > y[j].index {
+			if x[i].Index > y[j].Index {
 				j++
 			} else {
 				i++
@@ -228,11 +228,11 @@ func dot(x, y []SVM_Node) float64 {
 }
 
 func k_function(x, y []SVM_Node, param *SVM_Parameter) float64 {
-	switch param.kernel_type {
+	switch param.Kernel_type {
 	case LINEAR:
 		return dot(x, y)
 	case POLY:
-		return powi(param.gamma*dot(x, y)+param.coef0, param.degree)
+		return powi(param.Gamma*dot(x, y)+param.Coef0, param.Degree)
 	case RBF:
 		{
 			var sum float64
@@ -242,35 +242,35 @@ func k_function(x, y []SVM_Node, param *SVM_Parameter) float64 {
 			i := 0
 			j := 0
 			for i < xlen && j < ylen {
-				if x[i].index == y[j].index {
-					d := x[i].value - y[j].value
+				if x[i].Index == y[j].Index {
+					d := x[i].Value - y[j].Value
 					i++
 					j++
 					sum += d * d
-				} else if x[i].index > y[j].index {
-					sum += y[j].value * y[j].value
+				} else if x[i].Index > y[j].Index {
+					sum += y[j].Value * y[j].Value
 					j++
 				} else {
-					sum += x[i].value * x[i].value
+					sum += x[i].Value * x[i].Value
 					i++
 				}
 			}
 
 			for i < xlen {
-				sum += x[i].value * x[i].value
+				sum += x[i].Value * x[i].Value
 				i++
 			}
 
 			for j < ylen {
-				sum += y[j].value * y[j].value
+				sum += y[j].Value * y[j].Value
 				j++
 			}
-			return math.Exp(-param.gamma * sum)
+			return math.Exp(-param.Gamma * sum)
 		}
 	case SIGMOID:
-		return math.Tanh(param.gamma*dot(x, y) + param.coef0)
+		return math.Tanh(param.Gamma*dot(x, y) + param.Coef0)
 	case PRECOMPUTED:
-		return x[int(y[0].value)].value
+		return x[int(y[0].Value)].Value
 	}
 	return 0
 }
@@ -1131,13 +1131,13 @@ type SVC_Q struct {
 
 func NewSVC_Q(prob *SVM_Problem, param *SVM_Parameter, y_ []int8) *SVC_Q {
 	this := &SVC_Q{
-		Kernel: *NewKernel(prob.l, prob.x, param),
+		Kernel: *NewKernel(prob.L, prob.X, param),
 		y:      make([]int8, len(y_)),
-		cache:  NewCache(prob.l, int64(param.cache_size*(1<<20))),
-		QD:     make([]float64, prob.l),
+		cache:  NewCache(prob.L, int64(param.Cache_size*(1<<20))),
+		QD:     make([]float64, prob.L),
 	}
 	copy(this.y, y_)
-	for i := 0; i < prob.l; i++ {
+	for i := 0; i < prob.L; i++ {
 		this.QD[i] = this.kernel_function(i, i)
 	}
 	return this
@@ -1172,11 +1172,11 @@ type ONE_CLASS_Q struct {
 
 func NewONE_CLASS_Q(prob *SVM_Problem, param *SVM_Parameter) *ONE_CLASS_Q {
 	this := &ONE_CLASS_Q{
-		Kernel: *NewKernel(prob.l, prob.x, param),
-		cache:  NewCache(prob.l, int64(param.cache_size*(1<<20))),
-		QD:     make([]float64, prob.l),
+		Kernel: *NewKernel(prob.L, prob.X, param),
+		cache:  NewCache(prob.L, int64(param.Cache_size*(1<<20))),
+		QD:     make([]float64, prob.L),
 	}
-	for i := 0; i < prob.l; i++ {
+	for i := 0; i < prob.L; i++ {
 		this.QD[i] = this.kernel_function(i, i)
 	}
 	return this
@@ -1216,12 +1216,12 @@ type SVR_Q struct {
 
 func NewSVR_Q(prob *SVM_Problem, param *SVM_Parameter) *SVR_Q {
 	this := &SVR_Q{
-		Kernel: *NewKernel(prob.l, prob.x, param),
-		l:      prob.l,
-		cache:  NewCache(prob.l, int64(param.cache_size*(1<<20))),
-		QD:     make([]float64, 2*prob.l),
-		sign:   make([]int8, 2*prob.l),
-		index:  make([]int, 2*prob.l),
+		Kernel: *NewKernel(prob.L, prob.X, param),
+		l:      prob.L,
+		cache:  NewCache(prob.L, int64(param.Cache_size*(1<<20))),
+		QD:     make([]float64, 2*prob.L),
+		sign:   make([]int8, 2*prob.L),
+		index:  make([]int, 2*prob.L),
 		buffer: make([][]float32, 2),
 	}
 	for k := 0; k < this.l; k++ {
@@ -1298,7 +1298,7 @@ func NewSvm() *SVM {
 }
 
 func (this *SVM) Solve_c_svc(prob *SVM_Problem, param *SVM_Parameter, alpha []float64, si *SolutionInfo, Cp, Cn float64) {
-	l := prob.l
+	l := prob.L
 	minus_ones := make([]float64, l)
 	y := make([]int8, l)
 
@@ -1307,7 +1307,7 @@ func (this *SVM) Solve_c_svc(prob *SVM_Problem, param *SVM_Parameter, alpha []fl
 	for i = 0; i < l; i++ {
 		alpha[i] = 0
 		minus_ones[i] = -1
-		if prob.y[i] > 0 {
+		if prob.Y[i] > 0 {
 			y[i] = +1
 		} else {
 			y[i] = -1
@@ -1316,7 +1316,7 @@ func (this *SVM) Solve_c_svc(prob *SVM_Problem, param *SVM_Parameter, alpha []fl
 
 	s := new(Solver)
 	s.Solve(l, NewSVC_Q(prob, param, y), minus_ones, y,
-		alpha, Cp, Cn, param.eps, si, param.shrinking)
+		alpha, Cp, Cn, param.Eps, si, param.Shrinking)
 
 	sum_alpha := float64(0)
 	for i = 0; i < l; i++ {
@@ -1324,7 +1324,7 @@ func (this *SVM) Solve_c_svc(prob *SVM_Problem, param *SVM_Parameter, alpha []fl
 	}
 
 	if Cp == Cn {
-		log.Println("nu = ", sum_alpha/(Cp*float64(prob.l)))
+		log.Println("nu = ", sum_alpha/(Cp*float64(prob.L)))
 	}
 
 	for i = 0; i < l; i++ {
@@ -1334,12 +1334,12 @@ func (this *SVM) Solve_c_svc(prob *SVM_Problem, param *SVM_Parameter, alpha []fl
 
 func (this *SVM) Solve_nu_svc(prob *SVM_Problem, param *SVM_Parameter, alpha []float64, si *SolutionInfo) {
 	var i int
-	l := prob.l
-	nu := param.nu
+	l := prob.L
+	nu := param.Nu
 	y := make([]int8, l)
 
 	for i = 0; i < l; i++ {
-		if prob.y[i] > 0 {
+		if prob.Y[i] > 0 {
 			y[i] = +1
 		} else {
 			y[i] = -1
@@ -1367,7 +1367,7 @@ func (this *SVM) Solve_nu_svc(prob *SVM_Problem, param *SVM_Parameter, alpha []f
 
 	s := new(Solver_NU)
 	s.Solve(l, NewSVC_Q(prob, param, y), zeros, y,
-		alpha, 1.0, 1.0, param.eps, si, param.shrinking)
+		alpha, 1.0, 1.0, param.Eps, si, param.Shrinking)
 	r := si.r
 
 	log.Println("C = ", 1/r)
@@ -1383,18 +1383,18 @@ func (this *SVM) Solve_nu_svc(prob *SVM_Problem, param *SVM_Parameter, alpha []f
 }
 
 func (this *SVM) Solve_one_class(prob *SVM_Problem, param *SVM_Parameter, alpha []float64, si *SolutionInfo) {
-	l := prob.l
+	l := prob.L
 	zeros := make([]float64, l)
 	ones := make([]int8, l)
 	var i int
 
-	n := int(param.nu) * prob.l // # of alpha's at upper bound
+	n := int(param.Nu) * prob.L // # of alpha's at upper bound
 
 	for i = 0; i < n; i++ {
 		alpha[i] = 1
 	}
-	if n < prob.l {
-		alpha[n] = param.nu*float64(prob.l) - float64(n)
+	if n < prob.L {
+		alpha[n] = param.Nu*float64(prob.L) - float64(n)
 	}
 	for i = n + 1; i < l; i++ {
 		alpha[i] = 0
@@ -1407,11 +1407,11 @@ func (this *SVM) Solve_one_class(prob *SVM_Problem, param *SVM_Parameter, alpha 
 
 	s := new(Solver)
 	s.Solve(l, NewONE_CLASS_Q(prob, param), zeros, ones,
-		alpha, 1.0, 1.0, param.eps, si, param.shrinking)
+		alpha, 1.0, 1.0, param.Eps, si, param.Shrinking)
 }
 
 func (this *SVM) Solve_epsilon_svr(prob *SVM_Problem, param *SVM_Parameter, alpha []float64, si *SolutionInfo) {
-	l := prob.l
+	l := prob.L
 	alpha2 := make([]float64, 2*l)
 	linear_term := make([]float64, 2*l)
 	y := make([]int8, 2*l)
@@ -1419,17 +1419,17 @@ func (this *SVM) Solve_epsilon_svr(prob *SVM_Problem, param *SVM_Parameter, alph
 
 	for i = 0; i < l; i++ {
 		alpha2[i] = 0
-		linear_term[i] = param.p - prob.y[i]
+		linear_term[i] = param.P - prob.Y[i]
 		y[i] = 1
 
 		alpha2[i+l] = 0
-		linear_term[i+l] = param.p + prob.y[i]
+		linear_term[i+l] = param.P + prob.Y[i]
 		y[i+l] = -1
 	}
 
 	s := new(Solver)
 	s.Solve(2*l, NewSVR_Q(prob, param), linear_term, y,
-		alpha2, param.C, param.C, param.eps, si, param.shrinking)
+		alpha2, param.C, param.C, param.Eps, si, param.Shrinking)
 	sum_alpha := float64(0)
 	for i = 0; i < l; i++ {
 		alpha[i] = alpha2[i] - alpha2[i+l]
@@ -1439,29 +1439,29 @@ func (this *SVM) Solve_epsilon_svr(prob *SVM_Problem, param *SVM_Parameter, alph
 }
 
 func (this *SVM) Solve_nu_svr(prob *SVM_Problem, param *SVM_Parameter, alpha []float64, si *SolutionInfo) {
-	l := prob.l
+	l := prob.L
 	C := param.C
 	alpha2 := make([]float64, 2*l)
 	linear_term := make([]float64, 2*l)
 	y := make([]int8, 2*l)
 	var i int
 
-	sum := C * param.nu * float64(l) / 2
+	sum := C * param.Nu * float64(l) / 2
 	for i = 0; i < l; i++ {
 		alpha2[i+l] = math.Min(sum, C)
 		alpha2[i] = alpha2[i+1]
 		sum -= alpha2[i]
 
-		linear_term[i] = -prob.y[i]
+		linear_term[i] = -prob.Y[i]
 		y[i] = 1
 
-		linear_term[i+l] = prob.y[i]
+		linear_term[i+l] = prob.Y[i]
 		y[i+l] = -1
 	}
 
 	s := new(Solver_NU)
 	s.Solve(2*l, NewSVR_Q(prob, param), linear_term, y,
-		alpha2, C, C, param.eps, si, param.shrinking)
+		alpha2, C, C, param.Eps, si, param.Shrinking)
 
 	log.Println("epsilon = ", -si.r)
 
@@ -1471,9 +1471,9 @@ func (this *SVM) Solve_nu_svr(prob *SVM_Problem, param *SVM_Parameter, alpha []f
 }
 
 func (this *SVM) SVM_train_one(prob *SVM_Problem, param *SVM_Parameter, Cp, Cn float64) *decision_function {
-	alpha := make([]float64, prob.l)
+	alpha := make([]float64, prob.L)
 	si := new(SolutionInfo)
-	switch param.svm_type {
+	switch param.Svm_type {
 	case C_SVC:
 		this.Solve_c_svc(prob, param, alpha, si, Cp, Cn)
 	case NU_SVC:
@@ -1492,10 +1492,10 @@ func (this *SVM) SVM_train_one(prob *SVM_Problem, param *SVM_Parameter, Cp, Cn f
 
 	nSV := 0
 	nBSV := 0
-	for i := 0; i < prob.l; i++ {
+	for i := 0; i < prob.L; i++ {
 		if math.Abs(alpha[i]) > 0 {
 			nSV++
-			if prob.y[i] > 0 {
+			if prob.Y[i] > 0 {
 				if math.Abs(alpha[i]) >= si.upper_bound_p {
 					nBSV++
 				}
@@ -1707,43 +1707,43 @@ func (this *SVM) multiclass_probability(k int, r [][]float64, p []float64) {
 func (this *SVM) SVM_binary_svc_probability(prob *SVM_Problem, param *SVM_Parameter, Cp, Cn float64, probAB []float64) {
 	var i int
 	nr_fold := 5
-	perm := make([]int, prob.l)
-	dec_values := make([]float64, prob.l)
+	perm := make([]int, prob.L)
+	dec_values := make([]float64, prob.L)
 
 	// random shuffle
-	for i = 0; i < prob.l; i++ {
+	for i = 0; i < prob.L; i++ {
 		perm[i] = i
 	}
-	for i = 0; i < prob.l; i++ {
-		j := i + int(rand.Int31n(int32(prob.l-i)))
+	for i = 0; i < prob.L; i++ {
+		j := i + int(rand.Int31n(int32(prob.L-i)))
 		//do {int _=perm[i]; perm[i]=perm[j]; perm[j]=_;} while(false);
 		perm[i], perm[j] = perm[j], perm[i]
 	}
 	for i = 0; i < nr_fold; i++ {
-		begin := i * prob.l / nr_fold
-		end := (i + 1) * prob.l / nr_fold
+		begin := i * prob.L / nr_fold
+		end := (i + 1) * prob.L / nr_fold
 		var j, k int
 		subprob := new(SVM_Problem)
 
-		subprob.l = prob.l - (end - begin)
-		subprob.x = make([][]SVM_Node, subprob.l)
-		subprob.y = make([]float64, subprob.l)
+		subprob.L = prob.L - (end - begin)
+		subprob.X = make([][]SVM_Node, subprob.L)
+		subprob.Y = make([]float64, subprob.L)
 
 		k = 0
 		for j = 0; j < begin; j++ {
-			subprob.x[k] = prob.x[perm[j]]
-			subprob.y[k] = prob.y[perm[j]]
+			subprob.X[k] = prob.X[perm[j]]
+			subprob.Y[k] = prob.Y[perm[j]]
 			k++
 		}
-		for j = end; j < prob.l; j++ {
-			subprob.x[k] = prob.x[perm[j]]
-			subprob.y[k] = prob.y[perm[j]]
+		for j = end; j < prob.L; j++ {
+			subprob.X[k] = prob.X[perm[j]]
+			subprob.Y[k] = prob.Y[perm[j]]
 			k++
 		}
 		p_count := 0
 		n_count := 0
 		for j = 0; j < k; j++ {
-			if subprob.y[j] > 0 {
+			if subprob.Y[j] > 0 {
 				p_count++
 			} else {
 				n_count++
@@ -1763,53 +1763,53 @@ func (this *SVM) SVM_binary_svc_probability(prob *SVM_Problem, param *SVM_Parame
 			}
 		} else {
 			subparam := param.Clone()
-			subparam.probability = 0
+			subparam.Probability = 0
 			subparam.C = 1.0
-			subparam.nr_weight = 2
-			subparam.weight_label = make([]int, 2)
-			subparam.weight = make([]float64, 2)
-			subparam.weight_label[0] = +1
-			subparam.weight_label[1] = -1
-			subparam.weight[0] = Cp
-			subparam.weight[1] = Cn
+			subparam.Nr_weight = 2
+			subparam.Weight_label = make([]int, 2)
+			subparam.Weight = make([]float64, 2)
+			subparam.Weight_label[0] = +1
+			subparam.Weight_label[1] = -1
+			subparam.Weight[0] = Cp
+			subparam.Weight[1] = Cn
 			submodel := this.SVM_train(subprob, subparam)
 			for j = begin; j < end; j++ {
 				dec_value := make([]float64, 1)
-				this.SVM_predict_values(submodel, prob.x[perm[j]], dec_value)
+				this.SVM_predict_values(submodel, prob.X[perm[j]], dec_value)
 				dec_values[perm[j]] = dec_value[0]
 				// ensure +1 -1 order; reason not using CV subroutine
-				dec_values[perm[j]] *= float64(submodel.label[0])
+				dec_values[perm[j]] *= float64(submodel.Label[0])
 			}
 		}
 	}
-	this.sigmoid_train(prob.l, dec_values, prob.y, probAB)
+	this.sigmoid_train(prob.L, dec_values, prob.Y, probAB)
 }
 
 func (this *SVM) SVM_svr_probability(prob *SVM_Problem, param *SVM_Parameter) float64 {
 	var i int
 	nr_fold := 5
-	ymv := make([]float64, prob.l)
+	ymv := make([]float64, prob.L)
 	mae := float64(0)
 
 	newparam := param.Clone()
-	newparam.probability = 0
+	newparam.Probability = 0
 	this.SVM_cross_validation(prob, newparam, nr_fold, ymv)
-	for i = 0; i < prob.l; i++ {
-		ymv[i] = prob.y[i] - ymv[i]
+	for i = 0; i < prob.L; i++ {
+		ymv[i] = prob.Y[i] - ymv[i]
 		mae += math.Abs(ymv[i])
 	}
-	mae /= float64(prob.l)
+	mae /= float64(prob.L)
 	std := math.Sqrt(2 * mae * mae)
 	count := 0
 	mae = 0
-	for i = 0; i < prob.l; i++ {
+	for i = 0; i < prob.L; i++ {
 		if math.Abs(ymv[i]) > 5*std {
 			count = count + 1
 		} else {
 			mae += math.Abs(ymv[i])
 		}
 	}
-	mae /= float64(prob.l - count)
+	mae /= float64(prob.L - count)
 	log.Println("Prob. model for test data: target value = predicted value + z,\nz: Laplace distribution e^(-|z|/sigma)/(2sigma),sigma=", mae)
 	return mae
 }
@@ -1818,7 +1818,7 @@ func (this *SVM) SVM_svr_probability(prob *SVM_Problem, param *SVM_Parameter) fl
 // perm, length l, must be allocated before calling this subroutine
 
 func (this *SVM) SVM_group_classes(prob *SVM_Problem, nr_class_ret []int, label_ret, start_ret, count_ret [][]int, perm []int) {
-	l := prob.l
+	l := prob.L
 	max_nr_class := 16
 	nr_class := 0
 	label := make([]int, max_nr_class)
@@ -1827,7 +1827,7 @@ func (this *SVM) SVM_group_classes(prob *SVM_Problem, nr_class_ret []int, label_
 	var i int
 
 	for i = 0; i < l; i++ {
-		this_label := int(prob.y[i])
+		this_label := int(prob.Y[i])
 		var j int
 		for j = 0; j < nr_class; j++ {
 			if this_label == label[j] {
@@ -1877,49 +1877,49 @@ func (this *SVM) SVM_group_classes(prob *SVM_Problem, nr_class_ret []int, label_
 func (this *SVM) SVM_train(prob *SVM_Problem, param *SVM_Parameter) *SVM_Model {
 
 	model := new(SVM_Model)
-	model.param = param
+	model.Param = param
 
-	if param.svm_type == ONE_CLASS || param.svm_type == EPSILON_SVR || param.svm_type == NU_SVR {
+	if param.Svm_type == ONE_CLASS || param.Svm_type == EPSILON_SVR || param.Svm_type == NU_SVR {
 		// regression or one-class-svm
-		model.nr_class = 2
-		model.label = nil
-		model.nSV = nil
-		model.probA = nil
-		model.probB = nil
-		model.sv_coef = make([][]float64, 1)
+		model.Nr_class = 2
+		model.Label = nil
+		model.NSV = nil
+		model.ProbA = nil
+		model.ProbB = nil
+		model.Sv_coef = make([][]float64, 1)
 
-		if param.probability == 1 && (param.svm_type == EPSILON_SVR || param.svm_type == NU_SVR) {
-			model.probA = make([]float64, 1)
-			model.probA[0] = this.SVM_svr_probability(prob, param)
+		if param.Probability == 1 && (param.Svm_type == EPSILON_SVR || param.Svm_type == NU_SVR) {
+			model.ProbA = make([]float64, 1)
+			model.ProbA[0] = this.SVM_svr_probability(prob, param)
 		}
 
 		f := this.SVM_train_one(prob, param, 0, 0)
-		model.rho = make([]float64, 1)
-		model.rho[0] = f.rho
+		model.Rho = make([]float64, 1)
+		model.Rho[0] = f.rho
 
 		nSV := 0
 		var i int
-		for i = 0; i < prob.l; i++ {
+		for i = 0; i < prob.L; i++ {
 			if math.Abs(f.alpha[i]) > 0 {
 				nSV++
 			}
 		}
-		model.l = nSV
+		model.L = nSV
 		model.SV = make([][]SVM_Node, nSV)
-		model.sv_coef[0] = make([]float64, nSV)
-		model.sv_indices = make([]int, nSV)
+		model.Sv_coef[0] = make([]float64, nSV)
+		model.Sv_indices = make([]int, nSV)
 		j := 0
-		for i = 0; i < prob.l; i++ {
+		for i = 0; i < prob.L; i++ {
 			if math.Abs(f.alpha[i]) > 0 {
-				model.SV[j] = prob.x[i]
-				model.sv_coef[0][j] = f.alpha[i]
-				model.sv_indices[j] = i+1
+				model.SV[j] = prob.X[i]
+				model.Sv_coef[0][j] = f.alpha[i]
+				model.Sv_indices[j] = i + 1
 				j++
 			}
 		}
 	} else {
 		// classification
-		l := prob.l
+		l := prob.L
 		tmp_nr_class := make([]int, 1)
 		tmp_label := make([][]int, 1)
 		tmp_start := make([][]int, 1)
@@ -1940,7 +1940,7 @@ func (this *SVM) SVM_train(prob *SVM_Problem, param *SVM_Parameter) *SVM_Model {
 		x := make([][]SVM_Node, l)
 		var i int
 		for i = 0; i < l; i++ {
-			x[i] = prob.x[perm[i]]
+			x[i] = prob.X[perm[i]]
 		}
 
 		// calculate weighted C
@@ -1949,17 +1949,17 @@ func (this *SVM) SVM_train(prob *SVM_Problem, param *SVM_Parameter) *SVM_Model {
 		for i = 0; i < nr_class; i++ {
 			weighted_C[i] = param.C
 		}
-		for i = 0; i < param.nr_weight; i++ {
+		for i = 0; i < param.Nr_weight; i++ {
 			var j int
 			for j = 0; j < nr_class; j++ {
-				if param.weight_label[i] == label[j] {
+				if param.Weight_label[i] == label[j] {
 					break
 				}
 			}
 			if j == nr_class {
-				log.Fatal("WARNING: class label " + strconv.Itoa(param.weight_label[i]) + " specified in weight is not found\n")
+				log.Fatal("WARNING: class label " + strconv.Itoa(param.Weight_label[i]) + " specified in weight is not found\n")
 			} else {
-				weighted_C[j] *= param.weight[i]
+				weighted_C[j] *= param.Weight[i]
 			}
 		}
 
@@ -1974,7 +1974,7 @@ func (this *SVM) SVM_train(prob *SVM_Problem, param *SVM_Parameter) *SVM_Model {
 		var probA, probB []float64
 		probA = nil
 		probB = nil
-		if param.probability == 1 {
+		if param.Probability == 1 {
 			probA = make([]float64, nr_class*(nr_class-1)/2)
 			probB = make([]float64, nr_class*(nr_class-1)/2)
 		}
@@ -1987,20 +1987,20 @@ func (this *SVM) SVM_train(prob *SVM_Problem, param *SVM_Parameter) *SVM_Model {
 				sj := start[j]
 				ci := count[i]
 				cj := count[j]
-				sub_prob.l = ci + cj
-				sub_prob.x = make([][]SVM_Node, sub_prob.l)
-				sub_prob.y = make([]float64, sub_prob.l)
+				sub_prob.L = ci + cj
+				sub_prob.X = make([][]SVM_Node, sub_prob.L)
+				sub_prob.Y = make([]float64, sub_prob.L)
 				var k int
 				for k = 0; k < ci; k++ {
-					sub_prob.x[k] = x[si+k]
-					sub_prob.y[k] = +1
+					sub_prob.X[k] = x[si+k]
+					sub_prob.Y[k] = +1
 				}
 				for k = 0; k < cj; k++ {
-					sub_prob.x[ci+k] = x[sj+k]
-					sub_prob.y[ci+k] = -1
+					sub_prob.X[ci+k] = x[sj+k]
+					sub_prob.Y[ci+k] = -1
 				}
 
-				if param.probability == 1 {
+				if param.Probability == 1 {
 					probAB := make([]float64, 2)
 					this.SVM_binary_svc_probability(sub_prob, param, weighted_C[i], weighted_C[j], probAB)
 					probA[p] = probAB[0]
@@ -2024,33 +2024,33 @@ func (this *SVM) SVM_train(prob *SVM_Problem, param *SVM_Parameter) *SVM_Model {
 
 		// build output
 
-		model.nr_class = nr_class
+		model.Nr_class = nr_class
 
-		model.label = make([]int, nr_class)
+		model.Label = make([]int, nr_class)
 		for i = 0; i < nr_class; i++ {
-			model.label[i] = label[i]
+			model.Label[i] = label[i]
 		}
 
-		model.rho = make([]float64, nr_class*(nr_class-1)/2)
+		model.Rho = make([]float64, nr_class*(nr_class-1)/2)
 		for i = 0; i < nr_class*(nr_class-1)/2; i++ {
-			model.rho[i] = f[i].rho
+			model.Rho[i] = f[i].rho
 		}
 
-		if param.probability == 1 {
-			model.probA = make([]float64, nr_class*(nr_class-1)/2)
-			model.probB = make([]float64, nr_class*(nr_class-1)/2)
+		if param.Probability == 1 {
+			model.ProbA = make([]float64, nr_class*(nr_class-1)/2)
+			model.ProbB = make([]float64, nr_class*(nr_class-1)/2)
 			for i = 0; i < nr_class*(nr_class-1)/2; i++ {
-				model.probA[i] = probA[i]
-				model.probB[i] = probB[i]
+				model.ProbA[i] = probA[i]
+				model.ProbB[i] = probB[i]
 			}
 		} else {
-			model.probA = nil
-			model.probB = nil
+			model.ProbA = nil
+			model.ProbB = nil
 		}
 
 		nnz := 0
 		nz_count := make([]int, nr_class)
-		model.nSV = make([]int, nr_class)
+		model.NSV = make([]int, nr_class)
 		for i = 0; i < nr_class; i++ {
 			nSV := 0
 			for j := 0; j < count[i]; j++ {
@@ -2059,20 +2059,20 @@ func (this *SVM) SVM_train(prob *SVM_Problem, param *SVM_Parameter) *SVM_Model {
 					nnz++
 				}
 			}
-			model.nSV[i] = nSV
+			model.NSV[i] = nSV
 			nz_count[i] = nSV
 		}
 
 		log.Println("Total nSV = ", nnz)
 
-		model.l = nnz
+		model.L = nnz
 		model.SV = make([][]SVM_Node, nnz)
-		model.sv_indices = make([]int, nnz)
+		model.Sv_indices = make([]int, nnz)
 		p = 0
 		for i = 0; i < l; i++ {
 			if nonzero[i] {
 				model.SV[p] = x[i]
-				model.sv_indices[p] = perm[i] + 1
+				model.Sv_indices[p] = perm[i] + 1
 				p++
 			}
 		}
@@ -2083,9 +2083,9 @@ func (this *SVM) SVM_train(prob *SVM_Problem, param *SVM_Parameter) *SVM_Model {
 			nz_start[i] = nz_start[i-1] + nz_count[i-1]
 		}
 
-		model.sv_coef = make([][]float64, nr_class-1)
+		model.Sv_coef = make([][]float64, nr_class-1)
 		for i = 0; i < nr_class-1; i++ {
-			model.sv_coef[i] = make([]float64, nnz)
+			model.Sv_coef[i] = make([]float64, nnz)
 		}
 
 		p = 0
@@ -2104,14 +2104,14 @@ func (this *SVM) SVM_train(prob *SVM_Problem, param *SVM_Parameter) *SVM_Model {
 				var k int
 				for k = 0; k < ci; k++ {
 					if nonzero[si+k] {
-						model.sv_coef[j-1][q] = f[p].alpha[k]
+						model.Sv_coef[j-1][q] = f[p].alpha[k]
 						q++
 					}
 				}
 				q = nz_start[j]
 				for k = 0; k < cj; k++ {
 					if nonzero[sj+k] {
-						model.sv_coef[i][q] = f[p].alpha[ci+k]
+						model.Sv_coef[i][q] = f[p].alpha[ci+k]
 						q++
 					}
 				}
@@ -2125,13 +2125,13 @@ func (this *SVM) SVM_train(prob *SVM_Problem, param *SVM_Parameter) *SVM_Model {
 func (this *SVM) SVM_cross_validation(prob *SVM_Problem, param *SVM_Parameter, nr_fold int, target []float64) {
 	var i int
 	fold_start := make([]int, nr_fold+1)
-	l := prob.l
+	l := prob.L
 	perm := make([]int, l)
 
 	// stratified cv may not give leave-one-out rate
 	// Each class to l folds -> some folds may have zero elements
-	if (param.svm_type == C_SVC ||
-		param.svm_type == NU_SVC) && nr_fold < l {
+	if (param.Svm_type == C_SVC ||
+		param.Svm_type == NU_SVC) && nr_fold < l {
 		tmp_nr_class := make([]int, 1)
 		tmp_label := make([][]int, 1)
 		tmp_start := make([][]int, 1)
@@ -2201,69 +2201,69 @@ func (this *SVM) SVM_cross_validation(prob *SVM_Problem, param *SVM_Parameter, n
 		var j, k int
 		subprob := new(SVM_Problem)
 
-		subprob.l = l - (end - begin)
-		subprob.x = make([][]SVM_Node, subprob.l)
-		subprob.y = make([]float64, subprob.l)
+		subprob.L = l - (end - begin)
+		subprob.X = make([][]SVM_Node, subprob.L)
+		subprob.Y = make([]float64, subprob.L)
 
 		k = 0
 		for j = 0; j < begin; j++ {
-			subprob.x[k] = prob.x[perm[j]]
-			subprob.y[k] = prob.y[perm[j]]
+			subprob.X[k] = prob.X[perm[j]]
+			subprob.Y[k] = prob.Y[perm[j]]
 			k++
 		}
 		for j = end; j < l; j++ {
-			subprob.x[k] = prob.x[perm[j]]
-			subprob.y[k] = prob.y[perm[j]]
+			subprob.X[k] = prob.X[perm[j]]
+			subprob.Y[k] = prob.Y[perm[j]]
 			k++
 		}
 		submodel := this.SVM_train(subprob, param)
-		if param.probability == 1 &&
-			(param.svm_type == C_SVC ||
-				param.svm_type == NU_SVC) {
+		if param.Probability == 1 &&
+			(param.Svm_type == C_SVC ||
+				param.Svm_type == NU_SVC) {
 			prob_estimates := make([]float64, this.SVM_get_nr_class(submodel))
 			for j = begin; j < end; j++ {
-				target[perm[j]] = this.SVM_predict_probability(submodel, prob.x[perm[j]], prob_estimates)
+				target[perm[j]] = this.SVM_predict_probability(submodel, prob.X[perm[j]], prob_estimates)
 			}
 		} else {
 			for j = begin; j < end; j++ {
-				target[perm[j]] = this.SVM_predict(submodel, prob.x[perm[j]])
+				target[perm[j]] = this.SVM_predict(submodel, prob.X[perm[j]])
 			}
 		}
 	}
 }
 
 func (this *SVM) SVM_get_svm_type(model *SVM_Model) int {
-	return model.param.svm_type
+	return model.Param.Svm_type
 }
 
 func (this *SVM) SVM_get_nr_class(model *SVM_Model) int {
-	return model.nr_class
+	return model.Nr_class
 }
 
 func (this *SVM) SVM_get_labels(model *SVM_Model, label []int) {
-	if model.label != nil {
-		for i := 0; i < model.nr_class; i++ {
-			label[i] = model.label[i]
+	if model.Label != nil {
+		for i := 0; i < model.Nr_class; i++ {
+			label[i] = model.Label[i]
 		}
 	}
 }
 
 func (this *SVM) SVM_get_sv_indices(model SVM_Model, indices []int) {
-        if model.sv_indices != nil {
-                for i:=0; i<model.l; i++ {
-                        indices[i] = model.sv_indices[i]
+	if model.Sv_indices != nil {
+		for i := 0; i < model.L; i++ {
+			indices[i] = model.Sv_indices[i]
 		}
 	}
 }
 
 func (this *SVM) SVM_get_nr_sv(model SVM_Model) int {
-	return model.l
+	return model.L
 }
 
 func (this *SVM) SVM_get_svr_probability(model *SVM_Model) float64 {
 	var rst float64
-	if (model.param.svm_type == EPSILON_SVR || model.param.svm_type == NU_SVR) && model.probA != nil {
-		rst = model.probA[0]
+	if (model.Param.Svm_type == EPSILON_SVR || model.Param.Svm_type == NU_SVR) && model.ProbA != nil {
+		rst = model.ProbA[0]
 	} else {
 		log.Fatal("Model doesn't contain information for SVR probability inference\n")
 		rst = 0
@@ -2274,18 +2274,18 @@ func (this *SVM) SVM_get_svr_probability(model *SVM_Model) float64 {
 func (this *SVM) SVM_predict_values(model *SVM_Model, x []SVM_Node, dec_values []float64) float64 {
 	var i int
 	var rst float64
-	if model.param.svm_type == ONE_CLASS ||
-		model.param.svm_type == EPSILON_SVR ||
-		model.param.svm_type == NU_SVR {
-		sv_coef := model.sv_coef[0]
+	if model.Param.Svm_type == ONE_CLASS ||
+		model.Param.Svm_type == EPSILON_SVR ||
+		model.Param.Svm_type == NU_SVR {
+		sv_coef := model.Sv_coef[0]
 		sum := float64(0)
-		for i = 0; i < model.l; i++ {
-			sum += sv_coef[i] * k_function(x, model.SV[i], model.param)
+		for i = 0; i < model.L; i++ {
+			sum += sv_coef[i] * k_function(x, model.SV[i], model.Param)
 		}
-		sum -= model.rho[0]
+		sum -= model.Rho[0]
 		dec_values[0] = sum
 
-		if model.param.svm_type == ONE_CLASS {
+		if model.Param.Svm_type == ONE_CLASS {
 			if sum > 0 {
 				rst = 1
 			} else {
@@ -2295,18 +2295,18 @@ func (this *SVM) SVM_predict_values(model *SVM_Model, x []SVM_Node, dec_values [
 			rst = sum
 		}
 	} else {
-		nr_class := model.nr_class
-		l := model.l
+		nr_class := model.Nr_class
+		l := model.L
 
 		kvalue := make([]float64, l)
 		for i = 0; i < l; i++ {
-			kvalue[i] = k_function(x, model.SV[i], model.param)
+			kvalue[i] = k_function(x, model.SV[i], model.Param)
 		}
 
 		start := make([]int, nr_class)
 		start[0] = 0
 		for i = 1; i < nr_class; i++ {
-			start[i] = start[i-1] + model.nSV[i-1]
+			start[i] = start[i-1] + model.NSV[i-1]
 		}
 
 		vote := make([]int, nr_class)
@@ -2320,19 +2320,19 @@ func (this *SVM) SVM_predict_values(model *SVM_Model, x []SVM_Node, dec_values [
 				sum := float64(0)
 				si := start[i]
 				sj := start[j]
-				ci := model.nSV[i]
-				cj := model.nSV[j]
+				ci := model.NSV[i]
+				cj := model.NSV[j]
 
 				var k int
-				coef1 := model.sv_coef[j-1]
-				coef2 := model.sv_coef[i]
+				coef1 := model.Sv_coef[j-1]
+				coef2 := model.Sv_coef[i]
 				for k = 0; k < ci; k++ {
 					sum += coef1[si+k] * kvalue[si+k]
 				}
 				for k = 0; k < cj; k++ {
 					sum += coef2[sj+k] * kvalue[sj+k]
 				}
-				sum -= model.rho[p]
+				sum -= model.Rho[p]
 				dec_values[p] = sum
 
 				if dec_values[p] > 0 {
@@ -2350,17 +2350,17 @@ func (this *SVM) SVM_predict_values(model *SVM_Model, x []SVM_Node, dec_values [
 				vote_max_idx = i
 			}
 		}
-		rst = float64(model.label[vote_max_idx])
+		rst = float64(model.Label[vote_max_idx])
 	}
 	return rst
 }
 
 func (this *SVM) SVM_predict(model *SVM_Model, x []SVM_Node) float64 {
-	nr_class := model.nr_class
+	nr_class := model.Nr_class
 	var dec_values []float64
-	if model.param.svm_type == ONE_CLASS ||
-		model.param.svm_type == EPSILON_SVR ||
-		model.param.svm_type == NU_SVR {
+	if model.Param.Svm_type == ONE_CLASS ||
+		model.Param.Svm_type == EPSILON_SVR ||
+		model.Param.Svm_type == NU_SVR {
 		dec_values = make([]float64, 1)
 	} else {
 		dec_values = make([]float64, nr_class*(nr_class-1)/2)
@@ -2371,11 +2371,11 @@ func (this *SVM) SVM_predict(model *SVM_Model, x []SVM_Node) float64 {
 
 func (this *SVM) SVM_predict_probability(model *SVM_Model, x []SVM_Node, prob_estimates []float64) float64 {
 	var rst float64
-	if (model.param.svm_type == C_SVC ||
-		model.param.svm_type == NU_SVC) &&
-		model.probA != nil && model.probB != nil {
+	if (model.Param.Svm_type == C_SVC ||
+		model.Param.Svm_type == NU_SVC) &&
+		model.ProbA != nil && model.ProbB != nil {
 		var i int
-		nr_class := model.nr_class
+		nr_class := model.Nr_class
 		dec_values := make([]float64, nr_class*(nr_class-1)/2)
 		this.SVM_predict_values(model, x, dec_values)
 
@@ -2388,7 +2388,7 @@ func (this *SVM) SVM_predict_probability(model *SVM_Model, x []SVM_Node, prob_es
 		k := 0
 		for i = 0; i < nr_class; i++ {
 			for j := i + 1; j < nr_class; j++ {
-				pairwise_prob[i][j] = math.Min(math.Max(this.sigmoid_predict(dec_values[k], model.probA[k], model.probB[k]), min_prob), 1-min_prob)
+				pairwise_prob[i][j] = math.Min(math.Max(this.sigmoid_predict(dec_values[k], model.ProbA[k], model.ProbB[k]), min_prob), 1-min_prob)
 				pairwise_prob[j][i] = 1 - pairwise_prob[i][j]
 				k++
 			}
@@ -2401,7 +2401,7 @@ func (this *SVM) SVM_predict_probability(model *SVM_Model, x []SVM_Node, prob_es
 				prob_max_idx = i
 			}
 		}
-		rst = float64(model.label[prob_max_idx])
+		rst = float64(model.Label[prob_max_idx])
 	} else {
 		rst = this.SVM_predict(model, x)
 	}
@@ -2413,72 +2413,72 @@ func (this *SVM) SVM_save_model(model_file_name string, model *SVM_Model) {
 	fp, _ := os.OpenFile(model_file_name, os.O_CREATE|os.O_WRONLY|os.O_SYNC, 0644)
 	defer fp.Close()
 	fb := bufio.NewWriter(fp)
-	param := model.param
+	param := model.Param
 
-	fb.WriteString("svm_type " + this.svm_type_table[param.svm_type] + "\n")
-	fb.WriteString("kernel_type " + this.kernel_type_table[param.kernel_type] + "\n")
+	fb.WriteString("svm_type " + this.svm_type_table[param.Svm_type] + "\n")
+	fb.WriteString("kernel_type " + this.kernel_type_table[param.Kernel_type] + "\n")
 
-	if param.kernel_type == POLY {
-		fb.WriteString("degree " + strconv.Itoa(param.degree) + "\n")
+	if param.Kernel_type == POLY {
+		fb.WriteString("degree " + strconv.Itoa(param.Degree) + "\n")
 	}
 
-	if param.kernel_type == POLY ||
-		param.kernel_type == RBF ||
-		param.kernel_type == SIGMOID {
-		fb.WriteString("gamma " + strconv.FormatFloat(param.gamma, 'g', -1, 64) + "\n")
+	if param.Kernel_type == POLY ||
+		param.Kernel_type == RBF ||
+		param.Kernel_type == SIGMOID {
+		fb.WriteString("gamma " + strconv.FormatFloat(param.Gamma, 'g', -1, 64) + "\n")
 	}
 
-	if param.kernel_type == POLY ||
-		param.kernel_type == SIGMOID {
-		fb.WriteString("coef0 " + strconv.FormatFloat(param.coef0, 'g', -1, 64) + "\n")
+	if param.Kernel_type == POLY ||
+		param.Kernel_type == SIGMOID {
+		fb.WriteString("coef0 " + strconv.FormatFloat(param.Coef0, 'g', -1, 64) + "\n")
 	}
 
-	nr_class := model.nr_class
-	l := model.l
+	nr_class := model.Nr_class
+	l := model.L
 	fb.WriteString("nr_class " + strconv.Itoa(nr_class) + "\n")
 	fb.WriteString("total_sv " + strconv.Itoa(l) + "\n")
 
 	{
 		fb.WriteString("rho")
 		for i := 0; i < nr_class*(nr_class-1)/2; i++ {
-			fb.WriteString(" " + strconv.FormatFloat(model.rho[i], 'g', -1, 64))
+			fb.WriteString(" " + strconv.FormatFloat(model.Rho[i], 'g', -1, 64))
 		}
 		fb.WriteString("\n")
 	}
 
-	if model.label != nil {
+	if model.Label != nil {
 		fb.WriteString("label")
 		for i := 0; i < nr_class; i++ {
-			fb.WriteString(" " + strconv.Itoa(model.label[i]))
+			fb.WriteString(" " + strconv.Itoa(model.Label[i]))
 		}
 		fb.WriteString("\n")
 	}
 
-	if model.probA != nil { // regression has probA only
+	if model.ProbA != nil { // regression has probA only
 		fb.WriteString("probA")
 		for i := 0; i < nr_class*(nr_class-1)/2; i++ {
-			fb.WriteString(" " + strconv.FormatFloat(model.probA[i], 'g', -1, 64))
+			fb.WriteString(" " + strconv.FormatFloat(model.ProbA[i], 'g', -1, 64))
 		}
 		fb.WriteString("\n")
 	}
-	if model.probB != nil {
+	if model.ProbB != nil {
 		fb.WriteString("probB")
 		for i := 0; i < nr_class*(nr_class-1)/2; i++ {
-			fb.WriteString(" " + strconv.FormatFloat(model.probB[i], 'g', -1, 64))
+			fb.WriteString(" " + strconv.FormatFloat(model.ProbB[i], 'g', -1, 64))
 		}
 		fb.WriteString("\n")
 	}
 
-	if model.nSV != nil {
+	if model.NSV != nil {
 		fb.WriteString("nr_sv")
 		for i := 0; i < nr_class; i++ {
-			fb.WriteString(" " + strconv.Itoa(model.nSV[i]))
+			fb.WriteString(" " + strconv.Itoa(model.NSV[i]))
 		}
 		fb.WriteString("\n")
 	}
 
 	fb.WriteString("SV\n")
-	sv_coef := model.sv_coef
+	sv_coef := model.Sv_coef
 	SV := model.SV
 
 	for i := 0; i < l; i++ {
@@ -2487,11 +2487,11 @@ func (this *SVM) SVM_save_model(model_file_name string, model *SVM_Model) {
 		}
 
 		p := SV[i]
-		if param.kernel_type == PRECOMPUTED {
-			fb.WriteString("0:" + strconv.Itoa(int(p[0].value)))
+		if param.Kernel_type == PRECOMPUTED {
+			fb.WriteString("0:" + strconv.Itoa(int(p[0].Value)))
 		} else {
 			for j := 0; j < len(p); j++ {
-				fb.WriteString(strconv.Itoa(p[j].index) + ":" + strconv.FormatFloat(p[j].value, 'g', -1, 64) + " ")
+				fb.WriteString(strconv.Itoa(p[j].Index) + ":" + strconv.FormatFloat(p[j].Value, 'g', -1, 64) + " ")
 			}
 			fb.WriteString("\n")
 		}
@@ -2634,7 +2634,7 @@ func (this *SVM) svm_load_model(model_file_name string) {
 func (this *SVM) SVM_check_parameter(prob *SVM_Problem, param *SVM_Parameter) string {
 	// svm_type
 
-	svm_type := param.svm_type
+	svm_type := param.Svm_type
 	if svm_type != C_SVC &&
 		svm_type != NU_SVC &&
 		svm_type != ONE_CLASS &&
@@ -2645,7 +2645,7 @@ func (this *SVM) SVM_check_parameter(prob *SVM_Problem, param *SVM_Parameter) st
 
 	// kernel_type, degree
 
-	kernel_type := param.kernel_type
+	kernel_type := param.Kernel_type
 	if kernel_type != LINEAR &&
 		kernel_type != POLY &&
 		kernel_type != RBF &&
@@ -2654,21 +2654,21 @@ func (this *SVM) SVM_check_parameter(prob *SVM_Problem, param *SVM_Parameter) st
 		return "unknown kernel type"
 	}
 
-	if param.gamma < 0 {
+	if param.Gamma < 0 {
 		return "gamma < 0"
 	}
 
-	if param.degree < 0 {
+	if param.Degree < 0 {
 		return "degree of polynomial kernel < 0"
 	}
 
 	// cache_size,eps,C,nu,p,shrinking
 
-	if param.cache_size <= 0 {
+	if param.Cache_size <= 0 {
 		return "cache_size <= 0"
 	}
 
-	if param.eps <= 0 {
+	if param.Eps <= 0 {
 		return "eps <= 0"
 	}
 
@@ -2682,26 +2682,26 @@ func (this *SVM) SVM_check_parameter(prob *SVM_Problem, param *SVM_Parameter) st
 	if svm_type == NU_SVC ||
 		svm_type == ONE_CLASS ||
 		svm_type == NU_SVR {
-		if param.nu <= 0 || param.nu > 1 {
+		if param.Nu <= 0 || param.Nu > 1 {
 			return "nu <= 0 or nu > 1"
 		}
 	}
 	if svm_type == EPSILON_SVR {
-		if param.p < 0 {
+		if param.P < 0 {
 			return "p < 0"
 		}
 	}
-	if param.shrinking != 0 &&
-		param.shrinking != 1 {
+	if param.Shrinking != 0 &&
+		param.Shrinking != 1 {
 		return "shrinking != 0 and shrinking != 1"
 	}
 
-	if param.probability != 0 &&
-		param.probability != 1 {
+	if param.Probability != 0 &&
+		param.Probability != 1 {
 		return "probability != 0 and probability != 1"
 	}
 
-	if param.probability == 1 &&
+	if param.Probability == 1 &&
 		svm_type == ONE_CLASS {
 		return "one-class SVM probability output not supported yet"
 	}
@@ -2709,7 +2709,7 @@ func (this *SVM) SVM_check_parameter(prob *SVM_Problem, param *SVM_Parameter) st
 	// check whether nu-svc is feasible
 
 	if svm_type == NU_SVC {
-		l := prob.l
+		l := prob.L
 		max_nr_class := 16
 		nr_class := 0
 		label := make([]int, max_nr_class)
@@ -2717,7 +2717,7 @@ func (this *SVM) SVM_check_parameter(prob *SVM_Problem, param *SVM_Parameter) st
 
 		var i int
 		for i = 0; i < l; i++ {
-			this_label := int(prob.y[i])
+			this_label := int(prob.Y[i])
 			var j int
 			for j = 0; j < nr_class; j++ {
 				if this_label == label[j] {
@@ -2747,7 +2747,7 @@ func (this *SVM) SVM_check_parameter(prob *SVM_Problem, param *SVM_Parameter) st
 			n1 := count[i]
 			for j := i + 1; j < nr_class; j++ {
 				n2 := count[j]
-				if param.nu*float64(n1+n2)/2 > math.Min(float64(n1), float64(n2)) {
+				if param.Nu*float64(n1+n2)/2 > math.Min(float64(n1), float64(n2)) {
 					return "specified nu is infeasible"
 				}
 			}
@@ -2758,9 +2758,9 @@ func (this *SVM) SVM_check_parameter(prob *SVM_Problem, param *SVM_Parameter) st
 
 func (this *SVM) SVM_check_probability_model(model *SVM_Model) int {
 	var rst int
-	if ((model.param.svm_type == C_SVC ||
-		model.param.svm_type == NU_SVC) && model.probA != nil && model.probB != nil) ||
-		((model.param.svm_type == EPSILON_SVR || model.param.svm_type == NU_SVR) && model.probA != nil) {
+	if ((model.Param.Svm_type == C_SVC ||
+		model.Param.Svm_type == NU_SVC) && model.ProbA != nil && model.ProbB != nil) ||
+		((model.Param.Svm_type == EPSILON_SVR || model.Param.Svm_type == NU_SVR) && model.ProbA != nil) {
 		rst = 1
 	} else {
 		rst = 0

@@ -17,28 +17,27 @@ const (
 )
 
 type SVM_Parameter struct {
-	svm_type    int
-	kernel_type int
-	degree      int     // for poly
-	gamma       float64 // for poly/rbf/sigmoid
-	coef0       float64 // for poly/sigmoid
+	Svm_type    int
+	Kernel_type int
+	Degree      int     // for poly
+	Gamma       float64 // for poly/rbf/sigmoid
+	Coef0       float64 // for poly/sigmoid
 
 	// these are for training only
-	cache_size   float64   // in MB
-	eps          float64   // stopping criteria
+	Cache_size   float64   // in MB
+	Eps          float64   // stopping criteria
 	C            float64   // for C_SVC, EPSILON_SVR and NU_SVR
-	nr_weight    int       // for C_SVC
-	weight_label []int     // for C_SVC
-	weight       []float64 // for C_SVC
-	nu           float64   // for NU_SVC, ONE_CLASS, and NU_SVR
-	p            float64   // for EPSILON_SVR
-	shrinking    int       // use the shrinking heuristics
-	probability  int       // do probability estimates
+	Nr_weight    int       // for C_SVC
+	Weight_label []int     // for C_SVC
+	Weight       []float64 // for C_SVC
+	Nu           float64   // for NU_SVC, ONE_CLASS, and NU_SVR
+	P            float64   // for EPSILON_SVR
+	Shrinking    int       // use the shrinking heuristics
+	Probability  int       // do probability estimates
 
 }
 
-func (this *SVM_Parameter) Clone() (rst *SVM_Parameter) {
-	rst = new(SVM_Parameter)
-	*rst = *this
-	return
+func (this *SVM_Parameter) Clone() *SVM_Parameter {
+	rst := new(SVM_Parameter)
+	return rst
 }

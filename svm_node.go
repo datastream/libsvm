@@ -1,8 +1,8 @@
 package libsvm
 
 type SVM_Node struct {
-	index int
-	value float64
+	Index int
+	Value float64
 }
 
 func (this *SVM_Node) clone() *SVM_Node {
