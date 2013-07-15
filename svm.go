@@ -394,7 +394,7 @@ func (this *Solver) reconstruct_gradient() {
 		}
 	}
 	if (2 * nr_free) < this.active_size {
-		log.Fatal("\nWARNING: using -h 0 may be faster\n")
+		log.Print("\nWARNING: using -h 0 may be faster\n")
 	}
 
 	if (nr_free * this.l) > (2 * this.active_size * (this.l - this.active_size)) {
@@ -497,7 +497,7 @@ func (this *Solver) Solve(l int, Q QMatrix, p_ []float64, y_ []int8, alpha_ []fl
 			if shrinking != 0 {
 				this.do_shrinking()
 			}
-			log.Fatal(".")
+			log.Print(".")
 		}
 
 		if this.select_working_set(working_set) != 0 {
@@ -505,7 +505,7 @@ func (this *Solver) Solve(l int, Q QMatrix, p_ []float64, y_ []int8, alpha_ []fl
 			this.reconstruct_gradient()
 			// reset active set size and check
 			this.active_size = l
-			log.Fatal("*")
+			log.Print("*")
 			if this.select_working_set(working_set) != 0 {
 				break
 			} else {
@@ -644,9 +644,9 @@ func (this *Solver) Solve(l int, Q QMatrix, p_ []float64, y_ []int8, alpha_ []fl
 			// reconstruct the whole gradient to calculate objective value
 			this.reconstruct_gradient()
 			this.active_size = l
-			log.Fatal("*")
+			log.Print("*")
 		}
-		log.Fatal("\nWARNING: reaching max number of iterations")
+		log.Print("\nWARNING: reaching max number of iterations")
 	}
 
 	// calculate rho
@@ -673,7 +673,7 @@ func (this *Solver) Solve(l int, Q QMatrix, p_ []float64, y_ []int8, alpha_ []fl
 
 	si.upper_bound_p = Cp
 	si.upper_bound_n = Cn
-	log.Fatal("\noptimization finished, #iter = " + strconv.Itoa(iter) + "\n")
+	log.Printf("\noptimization finished, #iter = %d\n", iter)
 }
 
 func (this *Solver) select_working_set(working_set []int) int {
@@ -1957,7 +1957,7 @@ func (this *SVM) SVM_train(prob *SVM_Problem, param *SVM_Parameter) *SVM_Model {
 				}
 			}
 			if j == nr_class {
-				log.Fatal("WARNING: class label " + strconv.Itoa(param.Weight_label[i]) + " specified in weight is not found\n")
+				log.Printf("WARNING: class label %d specified in weight is not found\n", param.Weight_label[i])
 			} else {
 				weighted_C[j] *= param.Weight[i]
 			}
@@ -2265,7 +2265,7 @@ func (this *SVM) SVM_get_svr_probability(model *SVM_Model) float64 {
 	if (model.Param.Svm_type == EPSILON_SVR || model.Param.Svm_type == NU_SVR) && model.ProbA != nil {
 		rst = model.ProbA[0]
 	} else {
-		log.Fatal("Model doesn't contain information for SVR probability inference\n")
+		log.Print("Model doesn't contain information for SVR probability inference\n")
 		rst = 0
 	}
 	return rst
@@ -2534,7 +2534,7 @@ func (this *SVM) svm_load_model(model_file_name string) {
 				}
 			}
 			if i == len(this.svm_type_table) {
-				log.Fatal("unknown svm type.\n")
+				log.Print("unknown svm type.\n")
 				return nil
 			}
 		} else if cmd.startsWith("kernel_type") {
@@ -2546,7 +2546,7 @@ func (this *SVM) svm_load_model(model_file_name string) {
 				}
 			}
 			if i == len(this.kernel_type_table) {
-				log.Fatal("unknown kernel function.\n")
+				log.Print("unknown kernel function.\n")
 				return nil
 			}
 		} else if cmd.startsWith("degree") {
