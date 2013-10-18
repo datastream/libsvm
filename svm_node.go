@@ -1,12 +1,14 @@
 package libsvm
 
-type SVM_Node struct {
+// SVMNode define node of svm
+type SVMNode struct {
 	Index int
 	Value float64
 }
 
-func (this *SVM_Node) clone() *SVM_Node {
-	rst := new(SVM_Node)
-	*rst = *this
+func (s *SVMNode) clone() *SVMNode {
+	rst := new(SVMNode)
+	rst.Index = s.Index
+	rst.Value = s.Value
 	return rst
 }

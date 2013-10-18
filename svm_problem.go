@@ -1,7 +1,8 @@
 package libsvm
 
-type SVM_Problem struct {
+// SVMProblem define svm problem
+type SVMProblem struct {
 	L int
 	Y []float64
-	X [][]SVM_Node
+	X [][]SVMNode
 }

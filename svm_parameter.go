@@ -1,14 +1,15 @@
 package libsvm
 
 const (
-	/* svm_type */
-	C_SVC       = 0
-	NU_SVC      = 1
-	ONE_CLASS   = 2
-	EPSILON_SVR = 3
-	NU_SVR      = 4
+	/* svmType */
+	CSVC       = 0
+	NUSVC      = 1
+	ONECLASS   = 2
+	EPSILONSVR = 3
+	NUSVR      = 4
 
-	/* kernel_type */
+	/* kernelType */
+
 	LINEAR      = 0
 	POLY        = 1
 	RBF         = 2
@@ -16,28 +17,45 @@ const (
 	PRECOMPUTED = 4
 )
 
-type SVM_Parameter struct {
-	Svm_type    int
-	Kernel_type int
-	Degree      int     // for poly
-	Gamma       float64 // for poly/rbf/sigmoid
-	Coef0       float64 // for poly/sigmoid
+// SVMParameter define param for svm
+type SVMParameter struct {
+	SvmType    int
+	KernelType int
+	Degree     int     // for poly
+	Gamma      float64 // for poly/rbf/sigmoid
+	Coef0      float64 // for poly/sigmoid
 
 	// these are for training only
-	Cache_size   float64   // in MB
-	Eps          float64   // stopping criteria
-	C            float64   // for C_SVC, EPSILON_SVR and NU_SVR
-	Nr_weight    int       // for C_SVC
-	Weight_label []int     // for C_SVC
-	Weight       []float64 // for C_SVC
-	Nu           float64   // for NU_SVC, ONE_CLASS, and NU_SVR
-	P            float64   // for EPSILON_SVR
-	Shrinking    int       // use the shrinking heuristics
-	Probability  int       // do probability estimates
+	CacheSize   float64   // in MB
+	Eps         float64   // stopping criteria
+	C           float64   // for CSVC, EPSILONSVR and NUSVR
+	NrWeight    int       // for CSVC
+	WeightLabel []int     // for CSVC
+	Weight      []float64 // for CSVC
+	Nu          float64   // for NUSVC, ONECLASS, and NUSVR
+	P           float64   // for EPSILONSVR
+	Shrinking   int       // use the shrinking heuristics
+	Probability int       // do probability estimates
 
 }
 
-func (this *SVM_Parameter) Clone() *SVM_Parameter {
-	rst := new(SVM_Parameter)
+// Clone SVMParameter
+func (s *SVMParameter) Clone() *SVMParameter {
+	rst := new(SVMParameter)
+	rst.SvmType = s.SvmType
+	rst.KernelType = s.KernelType
+	rst.Degree = s.Degree
+	rst.Gamma = s.Gamma
+	rst.Coef0 = s.Coef0
+	rst.CacheSize = s.CacheSize
+	rst.Eps = s.Eps
+	rst.C = s.C
+	rst.NrWeight = s.NrWeight
+	copy(rst.WeightLabel, s.WeightLabel)
+	copy(rst.Weight, s.Weight)
+	rst.Nu = s.Nu
+	rst.P = s.P
+	rst.Shrinking = s.Shrinking
+	rst.Probability = s.Probability
 	return rst
 }
