@@ -196,6 +196,7 @@ func NewKernel(l int, x [][]SVMNode, param *SVMParameter) *Kernel {
 	m.gamma = param.Gamma
 	m.coef0 = param.Coef0
 	// x.clone
+	m.x = make([][]SVMNode, len(x))
 	copy(m.x, x)
 
 	if m.kernelType == RBF {
